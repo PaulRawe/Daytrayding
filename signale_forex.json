@@ -3,8 +3,8 @@
     "paar": "EUR/USD",
     "richtung": "Long",
     "einstieg": 1.0725,
-    "sl": 1.0705,  // Umbenennung von stop_loss zu sl
-    "tp": 1.0775,  // Umbenennung von take_profit zu tp
+    "sl": 1.0705,
+    "tp": 1.0775,
     "isin": "DE000DF3E6W6",
     "strategie": "Opening Range Breakout"
   },

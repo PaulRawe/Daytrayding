@@ -1,0 +1,47 @@
+[
+  {
+    "paar": "EUR/USD",
+    "richtung": "Long",
+    "einstieg": 1.0725,
+    "stop_loss": 1.0705,
+    "take_profit": 1.0775,
+    "isin": "DE000DF3E6W6",
+    "strategie": "Opening Range Breakout"
+  },
+  {
+    "paar": "USD/JPY",
+    "richtung": "Short",
+    "einstieg": 155.80,
+    "stop_loss": 156.20,
+    "take_profit": 154.90,
+    "isin": "DE000KA9J4M9",
+    "strategie": "Gap & Go"
+  },
+  {
+    "paar": "GBP/USD",
+    "richtung": "Long",
+    "einstieg": 1.2580,
+    "stop_loss": 1.2550,
+    "take_profit": 1.2640,
+    "isin": "DE000SN59GB3",
+    "strategie": "EMA-Crossover"
+  },
+  {
+    "paar": "USD/ZAR",
+    "richtung": "Long",
+    "einstieg": 18.50,
+    "stop_loss": 18.35,
+    "take_profit": 18.85,
+    "isin": "DE000SH6ZZY0",
+    "strategie": "VWAP Bounce"
+  },
+  {
+    "paar": "USD/TRY",
+    "richtung": "Short",
+    "einstieg": 32.00,
+    "stop_loss": 32.30,
+    "take_profit": 31.40,
+    "isin": "DE000KG5GSD2",
+    "strategie": "Breakout-Pullback"
+  }
+]

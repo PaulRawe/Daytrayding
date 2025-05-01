@@ -1,0 +1,22 @@
+{
+  "zeitpunkt": "2025-04-30 09:45:00",
+  "signale": [
+    {
+      "aktie": "Allianz",
+      "land": "DE",
+      "richtung": "Long",
+      "einstieg": 238.40,
+      "sl": 236.50,
+      "tp": 244.90,
+      "trefferquote": 72,
+      "zertifikat": {
+        "faktor": 5,
+        "typ": "Faktor Long",
+        "isin": "DE000MC9Y7X5",
+        "kurs_einstieg": 5.10,
+        "kurs_tp": 5.90,
+        "kurs_sl": 4.70
+      }
+    }
+  ]
+}

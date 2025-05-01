@@ -10,9 +10,63 @@
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <title>Live-Trading Signale</title>
   <style>
-    .countdown {
+    body {
+      font-family: sans-serif;
+      padding: 1rem;
+      background-color: #f4f4f4;
+    }
+
+    .btn {
+      background: #2c3e50;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 5px;
+      margin-top: 0.5rem;
+      cursor: pointer;
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid white;
+      border-top: 2px solid transparent;
+      border-radius: 50%;
+      display: inline-block;
+      animation: spin 1s linear infinite;
+      vertical-align: middle;
+      margin-left: 5px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .signal {
+      background: white;
+      border-radius: 6px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .long {
+      border-left: 4px solid green;
+    }
+
+    .short {
+      border-left: 4px solid red;
+    }
+
+    .kapitalfeld {
+      margin-bottom: 1rem;
+    }
+
+    .zeitinfo {
+      margin-bottom: 1rem;
       font-weight: bold;
-      margin-bottom: 10px;
     }
   </style>
 </head>
@@ -23,15 +77,14 @@
       <input type="number" id="capitalInput" value="1200" />
       <span id="capitalNotice">(Wird für Positionsgröße verwendet)</span>
     </div>
-    <button class="btn" id="scanButton" onclick="manuellScannen();">
+    <button class="btn" id="scanButton" onclick="ladeSignale(); ladeForexSignale();">
       Jetzt neu scannen
       <span id="spinner" style="display: none;" class="spinner"></span>
     </button>
   </div>
 
   <h1>Live-Trading Signale</h1>
-  <div class="zeitinfo" id="scanTime">Letzter Scan: wird geladen…</div>
-  <div class="countdown">Nächster Scan in <span id="scanCountdown">15</span> Sekunden</div>
+  <div class="zeitinfo" id="scanTime">Letzter Scan: wird geladen… <span id="countdown">(15s)</span></div>
   <div id="signals"></div>
 
   <h2>Forex-Signale (24h handelbar)</h2>
@@ -41,38 +94,11 @@
     const capitalInput = document.getElementById("capitalInput");
     const spinner = document.getElementById("spinner");
     const scanButton = document.getElementById("scanButton");
-    const countdownDisplay = document.getElementById("scanCountdown");
-
-    let countdown = 15;
-    let countdownInterval;
 
     function berechnePositionsgröße(kapital) {
       kapital = parseFloat(kapital);
       if (isNaN(kapital) || kapital <= 0) return 0;
       return Math.min(kapital * 0.05, kapital >= 10000 ? 3000 : kapital);
-    }
-
-    function aktualisiereCountdown() {
-      clearInterval(countdownInterval);
-      countdown = 15;
-      countdownDisplay.textContent = countdown;
-      countdownInterval = setInterval(() => {
-        countdown--;
-        if (countdown <= 0) {
-          clearInterval(countdownInterval);
-          ladeSignale();
-          ladeForexSignale();
-          aktualisiereCountdown();
-        } else {
-          countdownDisplay.textContent = countdown;
-        }
-      }, 1000);
-    }
-
-    function manuellScannen() {
-      ladeSignale();
-      ladeForexSignale();
-      aktualisiereCountdown();
     }
 
     async function ladeSignale() {
@@ -89,7 +115,7 @@
         const kapital = parseFloat(capitalInput.value);
         const positionsgröße = berechnePositionsgröße(kapital);
 
-        zeitinfo.textContent = "Letzter Scan: " + daten.zeitpunkt;
+        zeitinfo.firstChild.textContent = "Letzter Scan: " + daten.zeitpunkt + " ";
 
         daten.signale.forEach(signal => {
           const div = document.createElement("div");
@@ -116,7 +142,7 @@
 
       } catch (err) {
         container.innerHTML = "<p style='color:red;'>Fehler beim Laden der Aktiensignale.</p>";
-        zeitinfo.textContent = "Letzter Scan: unbekannt";
+        zeitinfo.firstChild.textContent = "Letzter Scan: unbekannt ";
       } finally {
         spinner.style.display = "none";
         scanButton.disabled = false;
@@ -131,18 +157,21 @@
         const res = await fetch("signale_forex.json?nocache=" + Date.now());
         const daten = await res.json();
 
-        daten.forEach(signal => {
+        daten.signale.forEach(signal => {
           const div = document.createElement("div");
           div.className = "signal " + signal.richtung.toLowerCase();
           div.innerHTML = `
-            <strong>${signal.paar}</strong><br/>
+            <strong>${signal.waehrungspaar}</strong><br/>
             Richtung: <b>${signal.richtung}</b><br/>
             Einstieg: <b>${signal.einstieg.toFixed(4)}</b><br/>
-            SL: ${signal.stop_loss.toFixed(4)}, TP: ${signal.take_profit.toFixed(4)}<br/>
-            Strategie: ${signal.strategie}<br/>
+            SL: ${signal.sl.toFixed(4)}, TP: ${signal.tp.toFixed(4)}<br/>
+            Volatilität (30min): ${signal.volatilitaet_range}<br/>
+            Trefferquote: ${signal.trefferquote}%<br/>
             <div class="zertifikat">
-              <b>Faktor-5-Zertifikat:</b><br/>
-              ISIN: ${signal.isin}
+              <b>Faktor-${signal.zertifikat.hebel}-Zertifikat:</b><br/>
+              Richtung: ${signal.zertifikat.typ}<br/>
+              Einstieg: ${signal.zertifikat.kurs_einstieg.toFixed(4)}<br/>
+              SL: ${signal.zertifikat.kurs_sl.toFixed(4)}, TP: ${signal.zertifikat.kurs_tp.toFixed(4)}
             </div>
           `;
           container.appendChild(div);
@@ -154,11 +183,30 @@
     }
 
     capitalInput.addEventListener("input", () => {
-      manuellScannen();
+      ladeSignale();
+      ladeForexSignale();
     });
 
-    manuellScannen(); // initialer Start
-    aktualisiereCountdown(); // Countdown starten
+    ladeSignale();
+    ladeForexSignale();
+
+    setInterval(() => {
+      ladeSignale();
+      ladeForexSignale();
+      countdown = 15;
+    }, 15000);
+
+    // Countdown-Funktion
+    let countdown = 15;
+    const countdownElement = document.getElementById("countdown");
+
+    function updateCountdown() {
+      countdown--;
+      if (countdown <= 0) countdown = 15;
+      countdownElement.textContent = `(${countdown}s)`;
+    }
+
+    setInterval(updateCountdown, 1000);
 
     // Service Worker Registrierung
     if ('serviceWorker' in navigator) {

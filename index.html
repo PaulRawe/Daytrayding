@@ -10,7 +10,10 @@
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <title>Live-Trading Signale</title>
   <style>
-    /* Dein CSS kann hier eingefügt werden */
+    .countdown {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
@@ -20,7 +23,7 @@
       <input type="number" id="capitalInput" value="1200" />
       <span id="capitalNotice">(Wird für Positionsgröße verwendet)</span>
     </div>
-    <button class="btn" id="scanButton" onclick="ladeSignale(); ladeForexSignale();">
+    <button class="btn" id="scanButton" onclick="manuellScannen();">
       Jetzt neu scannen
       <span id="spinner" style="display: none;" class="spinner"></span>
     </button>
@@ -28,6 +31,7 @@
 
   <h1>Live-Trading Signale</h1>
   <div class="zeitinfo" id="scanTime">Letzter Scan: wird geladen…</div>
+  <div class="countdown">Nächster Scan in <span id="scanCountdown">15</span> Sekunden</div>
   <div id="signals"></div>
 
   <h2>Forex-Signale (24h handelbar)</h2>
@@ -37,11 +41,38 @@
     const capitalInput = document.getElementById("capitalInput");
     const spinner = document.getElementById("spinner");
     const scanButton = document.getElementById("scanButton");
+    const countdownDisplay = document.getElementById("scanCountdown");
+
+    let countdown = 15;
+    let countdownInterval;
 
     function berechnePositionsgröße(kapital) {
       kapital = parseFloat(kapital);
       if (isNaN(kapital) || kapital <= 0) return 0;
       return Math.min(kapital * 0.05, kapital >= 10000 ? 3000 : kapital);
+    }
+
+    function aktualisiereCountdown() {
+      clearInterval(countdownInterval);
+      countdown = 15;
+      countdownDisplay.textContent = countdown;
+      countdownInterval = setInterval(() => {
+        countdown--;
+        if (countdown <= 0) {
+          clearInterval(countdownInterval);
+          ladeSignale();
+          ladeForexSignale();
+          aktualisiereCountdown();
+        } else {
+          countdownDisplay.textContent = countdown;
+        }
+      }, 1000);
+    }
+
+    function manuellScannen() {
+      ladeSignale();
+      ladeForexSignale();
+      aktualisiereCountdown();
     }
 
     async function ladeSignale() {
@@ -100,21 +131,18 @@
         const res = await fetch("signale_forex.json?nocache=" + Date.now());
         const daten = await res.json();
 
-        daten.signale.forEach(signal => {
+        daten.forEach(signal => {
           const div = document.createElement("div");
           div.className = "signal " + signal.richtung.toLowerCase();
           div.innerHTML = `
-            <strong>${signal.waehrungspaar}</strong><br/>
+            <strong>${signal.paar}</strong><br/>
             Richtung: <b>${signal.richtung}</b><br/>
             Einstieg: <b>${signal.einstieg.toFixed(4)}</b><br/>
-            SL: ${signal.sl.toFixed(4)}, TP: ${signal.tp.toFixed(4)}<br/>
-            Volatilität (30min): ${signal.volatilitaet_range}<br/>
-            Trefferquote: ${signal.trefferquote}%<br/>
+            SL: ${signal.stop_loss.toFixed(4)}, TP: ${signal.take_profit.toFixed(4)}<br/>
+            Strategie: ${signal.strategie}<br/>
             <div class="zertifikat">
-              <b>Faktor-${signal.zertifikat.hebel}-Zertifikat:</b><br/>
-              Richtung: ${signal.zertifikat.typ}<br/>
-              Einstieg: ${signal.zertifikat.kurs_einstieg.toFixed(4)}<br/>
-              SL: ${signal.zertifikat.kurs_sl.toFixed(4)}, TP: ${signal.zertifikat.kurs_tp.toFixed(4)}
+              <b>Faktor-5-Zertifikat:</b><br/>
+              ISIN: ${signal.isin}
             </div>
           `;
           container.appendChild(div);
@@ -126,17 +154,11 @@
     }
 
     capitalInput.addEventListener("input", () => {
-      ladeSignale();
-      ladeForexSignale();
+      manuellScannen();
     });
 
-    ladeSignale();
-    ladeForexSignale();
-
-    setInterval(() => {
-      ladeSignale();
-      ladeForexSignale();
-    }, 15000);
+    manuellScannen(); // initialer Start
+    aktualisiereCountdown(); // Countdown starten
 
     // Service Worker Registrierung
     if ('serviceWorker' in navigator) {

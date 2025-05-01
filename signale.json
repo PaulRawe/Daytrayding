@@ -3,8 +3,8 @@
     "aktie": "SAP",
     "richtung": "Long",
     "einstieg": 180.50,
-    "stop_loss": 179.60,
-    "take_profit": 183.00,
+    "sl": 179.60,
+    "tp": 183.00,
     "isin": "DE0007164600",
     "strategie": "Opening Range Breakout"
   },
@@ -12,8 +12,8 @@
     "aktie": "Volkswagen",
     "richtung": "Short",
     "einstieg": 120.30,
-    "stop_loss": 121.00,
-    "take_profit": 118.00,
+    "sl": 121.00,
+    "tp": 118.00,
     "isin": "DE0007664039",
     "strategie": "Gap & Go"
   },
@@ -21,8 +21,8 @@
     "aktie": "Adidas",
     "richtung": "Long",
     "einstieg": 203.10,
-    "stop_loss": 201.50,
-    "take_profit": 207.50,
+    "sl": 201.50,
+    "tp": 207.50,
     "isin": "DE000A1EWWW0",
     "strategie": "EMA-Crossover"
   },
@@ -30,8 +30,8 @@
     "aktie": "BASF",
     "richtung": "Short",
     "einstieg": 47.80,
-    "stop_loss": 48.30,
-    "take_profit": 46.20,
+    "sl": 48.30,
+    "tp": 46.20,
     "isin": "DE000BASF111",
     "strategie": "VWAP Bounce"
   },
@@ -39,8 +39,8 @@
     "aktie": "Siemens",
     "richtung": "Long",
     "einstieg": 140.00,
-    "stop_loss": 138.50,
-    "take_profit": 143.50,
+    "sl": 138.50,
+    "tp": 143.50,
     "isin": "DE0007236101",
     "strategie": "Breakout-Pullback"
   }
